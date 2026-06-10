@@ -1,0 +1,199 @@
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 
+ * Get from shadcn UI Themes: https://ui.shadcn.com/themes
+ * Or run `pnpx shadcn-custom-theme`
+ * By default Dogokit is using Tailwind CSS color: Indigo
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100% /* white */;
+    --foreground: 229 84% 5% /* slate-950 */;
+    --card: 0 0% 100% /* white */;
+    --card-foreground: 229 84% 5% /* slate-950 */;
+    --popover: 0 0% 100% /* white */;
+    --popover-foreground: 229 84% 5% /* slate-950 */;
+    --primary: 244 76% 59% /* indigo-600 */;
+    --primary-foreground: 226 100% 97% /* indigo-50 */;
+    --secondary: 227 100% 94% /* indigo-100 */;
+    --secondary-foreground: 243 48% 35% /* indigo-900 */;
+    --muted: 215 32% 92% /* slate-200 */;
+    --muted-foreground: 216 17% 47% /* slate-500 */;
+    --accent: 227 100% 94% /* indigo-100 */;
+    --accent-foreground: 243 48% 35% /* indigo-900 */;
+    --destructive: 0 85% 61% /* red-500 */;
+    --destructive-foreground: 211 41% 99% /* slate-50 */;
+    --border: 215 32% 92% /* slate-200 */;
+    --input: 216 21% 66% /* slate-400 */;
+    --ring: 244 76% 59% /* indigo-600 */;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 229 84% 5% /* slate-950 */;
+    --foreground: 211 41% 99% /* slate-50 */;
+    --card: 229 84% 5% /* slate-950 */;
+    --card-foreground: 211 41% 99% /* slate-50 */;
+    --popover: 229 84% 5% /* slate-950 */;
+    --popover-foreground: 211 41% 99% /* slate-50 */;
+    --primary: 238 73% 67% /* indigo-500 */;
+    --primary-foreground: 226 100% 97% /* indigo-50 */;
+    --secondary: 243 48% 20% /* indigo-950 */;
+    --secondary-foreground: 226 100% 97% /* indigo-50 */;
+    --muted: 229 47% 11% /* slate-900 */;
+    --muted-foreground: 216 21% 66% /* slate-400 */;
+    --accent: 244 55% 42% /* indigo-800 */;
+    --accent-foreground: 230 94% 82% /* indigo-300 */;
+    --destructive: 0 63% 31% /* red-900 */;
+    --destructive-foreground: 211 41% 99% /* slate-50 */;
+    --border: 218 33% 18% /* slate-800 */;
+    --input: 218 33% 18% /* slate-800 */;
+    --ring: 244 76% 59% /* indigo-600 */;
+  }
+}
+
+/*
+ * Custom layers for default stylings
+ * Feel free to remove them to reset
+ */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply cursor-default bg-background text-foreground transition-colors;
+    @apply selection:bg-primary/75 selection:text-white;
+  }
+  img {
+    @apply selection:bg-primary/25;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold text-foreground;
+  }
+  h1 {
+    @apply text-4xl sm:text-5xl;
+  }
+  h2 {
+    @apply text-2xl sm:text-3xl;
+  }
+  h3 {
+    @apply text-xl sm:text-2xl;
+  }
+  h4 {
+    @apply text-lg leading-snug sm:text-xl;
+  }
+  h5 {
+    @apply text-base leading-snug sm:text-lg;
+  }
+  h6 {
+    @apply text-base leading-snug;
+  }
+  input[type="date"]::-webkit-inner-spin-button,
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    @apply dark:opacity-0;
+  }
+}
+
+/*
+ * Custom components
+ * It's also possible to use the Tailwind classes into a component
+ */
+@layer components {
+  .site-container {
+    @apply mx-auto min-h-screen w-full max-w-7xl px-4 pt-12;
+  }
+  .site-header {
+    @apply mx-auto w-full max-w-prose space-y-4;
+  }
+  .site-section {
+    @apply mx-auto w-full max-w-prose;
+  }
+  .site-section-md {
+    @apply mx-auto w-full max-w-md;
+  }
+  .site-section-2xl {
+    @apply mx-auto w-full max-w-2xl;
+  }
+  .app-container {
+    @apply mx-auto w-full space-y-6 overflow-hidden p-4;
+  }
+  .app-header {
+    @apply flex w-full flex-wrap;
+  }
+  .app-section {
+    @apply w-full max-w-7xl space-y-2;
+  }
+  .input-natural {
+    @apply border-transparent bg-transparent p-0 placeholder:text-muted-foreground/30;
+    @apply focus:border-transparent focus:outline-none focus:ring-0;
+  }
+}
+
+/*
+ * Custom utilities
+ */
+@layer utilities {
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+  .prose-config {
+    @apply prose prose-slate dark:prose-invert focus:outline-none;
+    @apply prose-headings:prose-heading-styles;
+    @apply prose-a:prose-a-styles;
+    @apply prose-pre:prose-pre-styles;
+    @apply prose-code:prose-code-styles;
+  }
+  .prose-heading-styles {
+    @apply font-semibold;
+  }
+  .prose-a-styles {
+    @apply focus-ring cursor-pointer rounded-xs no-underline transition;
+    @apply text-primary hover:text-primary/75;
+  }
+  .prose-pre-styles {
+    @apply bg-muted text-foreground;
+  }
+  .prose-code-styles {
+    @apply before:content-none after:content-none;
+  }
+  .prose > ul > li > p {
+    @apply my-0;
+  }
+  .prose > ol > li > p {
+    @apply my-0;
+  }
+}
+
+/* TipTap */
+.tiptap p.is-empty::before {
+  @apply pointer-events-none float-left h-0 text-muted-foreground/30;
+
+  content: attr(data-placeholder);
+}
+
+/* Uploadcare */
+.uploadcare-config {
+  --h-accent: 244;
+  --s-accent: 55%;
+  --l-accent: calc(50% - 5% * var(--darkmode));
+  --border-radius-element: calc(var(--radius) - 2px);
+  --border-radius-frame: calc(var(--radius) - 2px);
+  --border-radius-thumb: calc(var(--radius) - 2px);
+}
+
+.uploadcare-config.light {
+  --darkmode: 0;
+}
+
+.uploadcare-config.dark {
+  --darkmode: 1;
+}

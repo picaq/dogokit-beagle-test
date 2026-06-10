@@ -1,0 +1,10 @@
+__*.md
+/build
+/coverage-ts
+/docs/SOCIAL.md
+/node_modules
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+slides.md
+yarn.lock

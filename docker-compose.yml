@@ -1,0 +1,30 @@
+# https://docs.docker.com/engine/reference/commandline/compose_up
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:alpine
+    container_name: dogokit-postgres
+    hostname: database
+    restart: no
+    volumes:
+      - postgres_data:/var/lib/postgres
+    ports:
+      - ${POSTGRES_HOST_PORT}:${POSTGRES_CONTAINER_PORT}
+    env_file:
+      - .env
+  # mysql:
+  #   image: mysql:8
+  #   container_name: dogokit-mysql
+  #   hostname: database
+  #   restart: no
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #   ports:
+  #     - ${MYSQL_HOST_PORT}:${MYSQL_CONTAINER_PORT}
+  #   env_file:
+  #     - .env
+
+volumes:
+  postgres_data:
+  # mysql_data:

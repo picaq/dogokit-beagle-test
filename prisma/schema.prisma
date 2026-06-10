@@ -1,0 +1,270 @@
+// Prisma Schema
+//
+// https://pris.ly/d/prisma-schema
+// https://github.com/remix-run/indie-stack/blob/main/prisma/schema.prisma
+// https://github.com/epicweb-dev/epic-stack/blob/main/prisma/schema.prisma
+// https://github.com/planetscale/beam/blob/main/prisma/schema.prisma
+// Visualize with https://prismaliser.app
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters", "fullTextSearch", "fullTextIndex", "metrics", "views"]
+}
+
+// Uncomment this to enable Prisma Docs Generator
+// generator docs {
+//   provider = "node node_modules/prisma-docs-generator"
+// }
+
+// -----------------------------------------------------------------------------
+// User
+// -----------------------------------------------------------------------------
+
+model User {
+  id String @id @default(cuid())
+
+  email    String  @unique
+  username String  @unique
+  phone    String? @unique // numeric string
+
+  fullname String
+  nickname String?
+
+  password    Password?
+  connections Connection[]
+  roles       Role[]
+
+  images   UserImage[] // multiple user images / avatars / profile pictures
+  profiles UserProfile[]
+  pages    Page[]
+  posts    Post[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([id])
+  @@index([email])
+  @@index([username])
+  @@index([phone])
+}
+
+model UserProfile {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String
+
+  headline String?
+  bio      String? @db.Text
+  links    Json?
+
+  isPrimary Boolean? @default(true)
+  isPublic  Boolean? @default(true)
+  modeName  String?  @default("DEFAULT")
+  sequence  Int?     @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, userId])
+  @@index([userId])
+}
+
+model Role {
+  id String @id @default(cuid())
+
+  sequence    Int?    @unique // 1, 2, 3, ...
+  symbol      String  @unique // ROOT, ADMIN, MEMBER, ...
+  name        String  @unique // Root, Admin, Member, ...
+  description String? @db.Text // Summary of abilities
+
+  users       User[]
+  permissions Permission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([symbol])
+}
+
+model Permission {
+  id String @id @default(cuid())
+
+  action      String // create, read, update, delete
+  entity      String // user, post, etc.
+  access      String // own or any
+  description String? @db.Text // details of the permission ability
+
+  roles Role[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([action, entity, access])
+}
+
+model Password {
+  id String @id @default(cuid())
+
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String @unique
+
+  hash String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("UserPassword")
+}
+
+model Connection {
+  id String @id @default(cuid())
+
+  providerName String
+  providerId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId String
+
+  @@unique([providerId, providerName])
+  @@index([userId])
+  @@map("UserConnection")
+}
+
+model UserImage {
+  id String @id @default(cuid())
+
+  url     String
+  altText String?
+
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([id, userId])
+  @@index([userId])
+}
+
+// -----------------------------------------------------------------------------
+// Page
+// -----------------------------------------------------------------------------
+
+model Page {
+  id String @id @default(cuid())
+
+  slug        String @unique
+  title       String @db.Text
+  description String @db.Text
+  content     String @db.Text
+
+  status   PageStatus @relation(fields: [statusId], references: [id])
+  statusId String
+
+  user   User?   @relation(fields: [userId], references: [id], onUpdate: Cascade)
+  userId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([statusId])
+  @@index([userId])
+}
+
+model PageStatus {
+  id String @id @default(cuid())
+
+  sequence    Int?    @unique // 1, 2, 3, ...
+  symbol      String  @unique // DRAFT, PUBLISHED, ...
+  name        String  @unique // Draft, Published, ...
+  description String? @db.Text // Status definition
+
+  pages Page[]
+}
+
+// -----------------------------------------------------------------------------
+// Post
+// -----------------------------------------------------------------------------
+
+model Post {
+  id String @id @default(cuid())
+
+  slug        String  @unique
+  title       String  @db.Text
+  description String? @db.Text
+  content     String  @db.Text
+  excerpt     String  @db.Text
+
+  images PostImage[]
+
+  status   PostStatus @relation(fields: [statusId], references: [id])
+  statusId String
+
+  user   User   @relation(fields: [userId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  userId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([statusId])
+  @@index([userId])
+}
+
+model PostStatus {
+  id String @id @default(cuid())
+
+  sequence    Int?    @unique // 1, 2, 3, ...
+  symbol      String  @unique // DRAFT, PUBLISHED, ARCHIVED, ...
+  name        String  @unique // Draft, Published, Archived, ...
+  description String? @db.Text // Status definition
+
+  posts Post[]
+}
+
+model PostImage {
+  id String @id @default(cuid())
+
+  url     String
+  altText String?
+
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  postId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+}
+
+// -----------------------------------------------------------------------------
+// Examples
+// -----------------------------------------------------------------------------
+
+model Example {
+  id String @id @default(cuid())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Image {
+  id String @id @default(cuid())
+
+  url     String
+  altText String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
