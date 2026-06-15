@@ -2,6 +2,20 @@ import { IconMatch } from "~/components/libs/icon"
 import { AnchorText } from "~/components/ui/anchor-text"
 import { ButtonAnchor } from "~/components/ui/button-anchor"
 
+export function ContentHighlights() {
+  return (
+    <section className="space-y-4">
+      <h3 className="font-display text-xl tracking-tight">Highlights</h3>
+      <ul className="list-disc space-y-2 pl-6">
+        <li>Full stack type safety with TypeScript end to end</li>
+        <li>Pre-configured authentication and authorization</li>
+        <li>Database ORM with Prisma and seeding utilities</li>
+        <li>Ready-to-use UI components built on Radix UI</li>
+      </ul>
+    </section>
+  )
+}
+
 export function ContentIntro() {
   return (
     <div className="space-y-10">
