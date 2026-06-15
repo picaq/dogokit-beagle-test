@@ -23,6 +23,10 @@ export function ContentIntro() {
             <IconMatch icon="remix" className="size-5" />
             <span>Learn Remix</span>
           </ButtonAnchor>
+          <ButtonAnchor size="lg" variant="secondary" href="https://picaq.github.io">
+            <IconMatch icon="github" className="size-5" />
+            <span>picaq</span>
+          </ButtonAnchor>
         </div>
       </header>
 

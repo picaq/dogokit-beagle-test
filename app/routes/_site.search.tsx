@@ -8,9 +8,11 @@ import {
   PaginationSearch,
 } from "~/components/shared/pagination-search"
 import { PostItem } from "~/components/shared/post-item"
+import { UserItem } from "~/components/shared/user-item"
 import { db } from "~/libs/db.server"
 import { createMeta } from "~/utils/meta"
 import { createSitemap } from "~/utils/sitemap"
+import { searchDocuments } from "~/utils/search"
 
 export const handle = createSitemap("/search", 0.8)
 
@@ -36,26 +38,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     })
   }
 
-  /**
-   * Custom query config, can be different for any cases
-   */
   const wherePost = {
-    OR: [{ slug: { contains } }, { title: { contains } }],
     status: {
       OR: [{ symbol: "PUBLISHED" }, { symbol: "ARCHIVED" }],
     },
   }
 
-  /**
-   * As searching and filtering might be complex,
-   * use Prisma directly, it might be refactored later into the models
-   */
-  const [totalItems, posts] = await db.$transaction([
-    db.post.count({ where: wherePost }),
+  const [users, posts] = await Promise.all([
+    db.user.findMany({
+      where: {
+        OR: [{ username: { contains } }, { fullname: { contains } }],
+      },
+      orderBy: { createdAt: "asc" },
+      include: { images: { select: { id: true, url: true } } },
+    }),
     db.post.findMany({
       where: wherePost,
-      skip: config.skip,
-      take: config.limitParam,
       orderBy: { updatedAt: "desc" },
       include: {
         status: { select: { symbol: true, name: true } },
@@ -65,14 +63,21 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     }),
   ])
 
+  const rankedUsers = searchDocuments(users, contains, ["username", "fullname"])
+  const rankedPosts = searchDocuments(posts, contains, ["title", "slug", "excerpt", "content"])
+  const combinedResults = [...rankedUsers, ...rankedPosts]
+  const totalItems = combinedResults.length
+  const pagedResults = combinedResults.slice(config.skip, config.skip + config.limitParam)
+
   return json({
     ...getPaginationOptions({ request, totalItems }),
-    posts,
+    users: pagedResults.filter((item): item is (typeof users)[number] => "username" in item),
+    posts: pagedResults.filter((item): item is (typeof posts)[number] => "title" in item),
   })
 }
 
 export default function SearchRoute() {
-  const { posts, ...loaderData } = useLoaderData<typeof loader>()
+  const { posts, users, ...loaderData } = useLoaderData<typeof loader>()
 
   return (
     <div className="site-container space-y-12">
@@ -90,14 +95,32 @@ export default function SearchRoute() {
         />
       </section>
 
-      <section className="site-section">
-        <ul className="space-y-12">
-          {posts.map(post => (
-            <li key={post.id}>
-              <PostItem post={post} />
-            </li>
-          ))}
-        </ul>
+      <section className="site-section space-y-8">
+        {users.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Users</h2>
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {users.map(user => (
+                <li key={user.id}>
+                  <UserItem user={user} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {posts.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Posts</h2>
+            <ul className="space-y-12">
+              {posts.map(post => (
+                <li key={post.id}>
+                  <PostItem post={post} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </section>
 
       <section className="site-section">
