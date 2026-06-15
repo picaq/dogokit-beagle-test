@@ -12,7 +12,7 @@ import { UserItem } from "~/components/shared/user-item"
 import { db } from "~/libs/db.server"
 import { createMeta } from "~/utils/meta"
 import { createSitemap } from "~/utils/sitemap"
-import { searchDocuments } from "~/utils/search"
+import { searchDocuments, tokenize } from "~/utils/search"
 
 export const handle = createSitemap("/search", 0.8)
 
@@ -38,28 +38,32 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     })
   }
 
-  const wherePost = {
-    status: {
-      OR: [{ symbol: "PUBLISHED" }, { symbol: "ARCHIVED" }],
-    },
-    OR: [
-      { title: { contains } },
-      { slug: { contains } },
-      { excerpt: { contains } },
-      { content: { contains } },
-    ],
+  const terms = tokenize(contains)
+
+  const statusFilter = {
+    OR: [{ symbol: "PUBLISHED" }, { symbol: "ARCHIVED" }],
   }
+
+  const postOrConditions = terms.flatMap(term => [
+    { title: { contains: term, mode: "insensitive" } },
+    { slug: { contains: term, mode: "insensitive" } },
+    { excerpt: { contains: term, mode: "insensitive" } },
+    { content: { contains: term, mode: "insensitive" } },
+  ])
+
+  const userOrConditions = terms.flatMap(term => [
+    { username: { contains: term, mode: "insensitive" } },
+    { fullname: { contains: term, mode: "insensitive" } },
+  ])
 
   const [users, posts] = await Promise.all([
     db.user.findMany({
-      where: {
-        OR: [{ username: { contains } }, { fullname: { contains } }],
-      },
+      where: { OR: userOrConditions },
       orderBy: { createdAt: "asc" },
       include: { images: { select: { id: true, url: true } } },
     }),
     db.post.findMany({
-      where: wherePost,
+      where: { AND: [statusFilter, { OR: postOrConditions }] },
       orderBy: { updatedAt: "desc" },
       include: {
         status: { select: { symbol: true, name: true } },

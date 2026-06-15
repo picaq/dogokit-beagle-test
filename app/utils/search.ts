@@ -14,7 +14,7 @@ const normalize = (value: string | null | undefined) =>
     .replace(/[\u0300-\u036f]/g, "")
     .trim()
 
-function tokenize(query: string) {
+export function tokenize(query: string) {
   return normalize(query)
     .split(/[^a-z0-9]+/)
     .filter(Boolean)
