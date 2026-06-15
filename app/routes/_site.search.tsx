@@ -89,7 +89,7 @@ export default function SearchRoute() {
         <PaginationSearch
           itemName="result"
           searchPlaceholder="Search users and notes..."
-          count={posts.length}
+          count={users.length + posts.length}
           {...loaderData}
           isDefaultShow={false} // Search is blank by default
         />
