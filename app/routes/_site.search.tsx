@@ -42,6 +42,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     status: {
       OR: [{ symbol: "PUBLISHED" }, { symbol: "ARCHIVED" }],
     },
+    OR: [
+      { title: { contains } },
+      { slug: { contains } },
+      { excerpt: { contains } },
+      { content: { contains } },
+    ],
   }
 
   const [users, posts] = await Promise.all([
